@@ -153,5 +153,40 @@ namespace Storage.Controllers
         {
             return _context.Product.Any(e => e.Id == id);
         }
+
+        public async Task<IActionResult> Inventory()
+        {
+            var products = await _context.Product.ToListAsync();
+            var productViewModels = products.Select(p => new ProductViewModel
+            {
+                Name = p.Name,
+                Category = p.Category,
+                Price = p.Price,
+                Count = p.Count,
+                InventoryValue = p.Price * p.Count
+            }).ToList();
+
+            return View(productViewModels);
+        }
+
+        public async Task<IActionResult> FilterByCategory(string category)
+        {
+            var products = await _context.Product.ToListAsync();
+
+            var filteredProducts = string.IsNullOrEmpty(category)
+                ? products
+                : products.Where(p => p.Category.Equals(category, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            var productViewModels = filteredProducts.Select(p => new ProductViewModel
+            {
+                Name = p.Name,
+                Category = p.Category,
+                Price = p.Price,
+                Count = p.Count,
+                InventoryValue = p.Price * p.Count
+            }).ToList();
+
+            return View("Inventory", productViewModels);
+        }
     }
 }
